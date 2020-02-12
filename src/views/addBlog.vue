@@ -1,7 +1,7 @@
 <template>
   <div class="add-blog">
     <h2>Add New Blog Post</h2>
-    <form>
+    <form v-if="!submitted">
       <label for="title">Blog Title:</label>
       <input type="text" name="title" v-model="blog.title" required>
       <label for="title">Blog Content:</label>
@@ -15,8 +15,16 @@
       <input type="checkbox" v-model="blog.categories" value="hari">
         <label>Utama</label>
       <input type="checkbox" v-model="blog.categories" value="utama">
+      <label>Author :</label>
+      <select v-model="blog.author">
+        <option v-for="(author, index) in authors" :key="index">{{author}}</option>
+      </select>
+      <button @click.prevent="post">Post</button>
       </div>
     </form>
+    <div v-if="submitted">
+      <h3>Sukses!!</h3>
+    </div>
     <div id="preview">
       <h3>Preview Blog</h3>
       <p>Blog title: {{blog.title}}</p>
@@ -26,10 +34,6 @@
         <li v-for="(category, index) in blog.categories" :key="index">{{category}}</li>
       </ul>
     </div>
-    <label>Author :</label>
-    <select v-model="blog.author">
-      <option v-for="(author, index) in authors" :key="index">{{author}}</option>
-    </select>
     <p>Author is : {{blog.author}}</p>
   </div>
 </template>
@@ -42,13 +46,39 @@ export default {
       title:"",
       content:"",
       categories:[],
-      author:""
+      author:"",
+      info: "",
     },
+    submitted: false,
     authors:[
       'Esa Rizki',
       'Abu Jelal'
     ],
-    })
+    }),
+  mounted(){
+    this.axios
+      .get('http://jsonplaceholder.typicode.com/posts')
+      .then((response) => {
+        console.log(response.data.slice(0,10))
+        this.blog.info = response.data.slice(0,10)
+      })
+      .catch((error) => {
+      // console.log(error)
+      })
+  },
+  methods:{
+    post(){
+      this.axios
+      .post('https://net-ninja-68db3.firebaseio.com/posts.json', this.blog)
+      .then((response) => {
+        console.log(response)
+        this.submitted = true;
+      })
+      .catch((error) => {
+      // console.log(error)
+      });
+    }
+  }
   
 }
 </script>
